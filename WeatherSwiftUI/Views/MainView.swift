@@ -16,6 +16,7 @@ struct MainView: View {
             Text("Hello, world!")
         }
         .padding()
+        
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 
-class WeatherManager {
+final class WeatherManager {
     let baseNetworkManager: NetworkService
     let apiKey: String
     
@@ -18,8 +18,11 @@ class WeatherManager {
     }
     
     
-    func getWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> WeatherModel{
-         var components = URLComponents(string: "https://api.openweathermap.org/data/2.5/weather")!
+    func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> WeatherModel{
+        guard var components = URLComponents(string: "https://api.openweathermap.org/data/2.5/weather") else {
+            throw NetworkError.invalidURL
+        }
+        
         components.queryItems = [
         URLQueryItem(name: "lat", value: "\(latitude)"),
         URLQueryItem(name: "lon", value: "\(longitude)"),
