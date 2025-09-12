@@ -10,11 +10,10 @@ import CoreLocation
 
 final class WeatherManager {
     let baseNetworkManager: NetworkService
-    let apiKey: String
+    let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String ?? ""
     
-    init(baseNetworkManager: NetworkService = BaseNetworkService(), apiKey: String){
+    init(baseNetworkManager: NetworkService = BaseNetworkService()){
         self.baseNetworkManager = baseNetworkManager
-        self.apiKey = apiKey
     }
     
     
@@ -34,6 +33,12 @@ final class WeatherManager {
         guard let url = components.url else {
             throw NetworkError.invalidURL
         }
+        
+        let (_, response) = try await URLSession.shared.data(from: url)
+        if let httpResponse = response as? HTTPURLResponse {
+            print("HTTP status code:", httpResponse.statusCode)
+        }
+        print(components.url!)
         
         return try await baseNetworkManager.fetchData(from: url)
     }

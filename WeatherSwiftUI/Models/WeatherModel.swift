@@ -16,10 +16,16 @@ struct WeatherModel: Codable {
     let clouds: Clouds
     let id: Int
     let name: String
+    let dt: Int
     let cod: Int
+    let sys: Sys
     
     struct Coord: Codable {
         let lon, lat: Double
+    }
+    
+    struct Sys: Codable{
+        let country: String
     }
     
     struct Weather: Codable {
@@ -36,11 +42,11 @@ struct WeatherModel: Codable {
     
     struct Main: Codable {
         let temp: Double
-        let feelsLike: Double
-        let tempMin: Double
-        let tempMax: Double
-        let pressure: Int
-        let humidity: Int
+        let feelsLike: Double?
+        let tempMin: Double?
+        let tempMax: Double?
+        let pressure: Int?
+        let humidity: Int?
         
         var temperatureString: String {
             String(format: "%.1f", temp)
@@ -57,16 +63,31 @@ struct WeatherModel: Codable {
         
     }
     
-    
-    
     struct Wind: Codable {
         let speed: Double
         let deg: Int
-        let gust: Double
+        let gust: Double?
     }
     
 }
 
+
+extension WeatherModel{
+    var cityName: String{
+        "\(name), \(sys.country)"
+    }
+    
+    var date: String{
+        let date = Date(timeIntervalSince1970: TimeInterval(dt))
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.dateStyle = .full
+        formatter.timeStyle = .short
+        formatter.timeZone = .current
+        return formatter.string(from: date)
+        
+    }
+}
 
 
 

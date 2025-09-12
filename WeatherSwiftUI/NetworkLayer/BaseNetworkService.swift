@@ -31,6 +31,7 @@ class BaseNetworkService: NetworkService{
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             return try decoder.decode(T.self, from: data)
         } catch{
+            print("Decoding faild", error)
             throw NetworkError.decodingError(error)
         }
      }
