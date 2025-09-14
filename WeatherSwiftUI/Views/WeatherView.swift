@@ -15,7 +15,7 @@ struct WeatherView: View {
     var body: some View {
         NavigationStack{
             VStack(alignment: .leading, spacing: 16) {
-                Text("\(weather.formatedDate)")
+                Text("\(formatter.formattedDate)")
                     .font(.footnote)
                 Text("\(formatter.cityName)")
                     .font(.system(.subheadline, weight: .bold))
