@@ -19,7 +19,6 @@ struct WeatherModel: Codable {
     let dt: Int
     let cod: Int
     let sys: Sys
-    
     struct Coord: Codable {
         let lon, lat: Double
     }
@@ -42,9 +41,9 @@ struct WeatherModel: Codable {
     
     struct Main: Codable {
         let temp: Double
-        let feelsLike: Double?
-        let tempMin: Double?
-        let tempMax: Double?
+        let feelsLike: Double
+        let tempMin: Double
+        let tempMax: Double
         let pressure: Int?
         let humidity: Int?
         
@@ -52,11 +51,15 @@ struct WeatherModel: Codable {
             String(format: "%.1f", temp)
         }
         
+        var tempMaxString: String {
+            String(format: "%.2f", tempMax)
+        }
+        
         enum CodingKeys: String, CodingKey {
             case temp
-            case feelsLike = "feels_like"
-            case tempMin   = "temp_min"
-            case tempMax   = "temp_max"
+            case feelsLike 
+            case tempMin
+            case tempMax
             case pressure
             case humidity
         }
@@ -70,24 +73,3 @@ struct WeatherModel: Codable {
     }
     
 }
-
-
-extension WeatherModel{
-    var cityName: String{
-        "\(name), \(sys.country)"
-    }
-    
-    var date: String{
-        let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let formatter = DateFormatter()
-        formatter.locale = .current
-        formatter.dateStyle = .full
-        formatter.timeStyle = .short
-        formatter.timeZone = .current
-        return formatter.string(from: date)
-        
-    }
-}
-
-
-

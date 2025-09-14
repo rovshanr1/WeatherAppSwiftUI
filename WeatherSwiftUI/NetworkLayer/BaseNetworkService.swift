@@ -30,6 +30,9 @@ class BaseNetworkService: NetworkService{
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             return try decoder.decode(T.self, from: data)
+        }catch let error as DecodingError{
+            print("decoding error: \(error)")
+            throw error 
         } catch{
             print("Decoding faild", error)
             throw NetworkError.decodingError(error)

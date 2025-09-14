@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct WeatherView: View {
-    @StateObject var dateVM = DateViewModel()
+    @StateObject var formatter = FormatterManager()
     var weather: WeatherModel
+    var forecast: ForecastModel
     
     var body: some View {
         NavigationStack{
-            VStack(alignment: .leading) {
-                Text("11:30 am, Fri Jan 4")
+            VStack(alignment: .leading, spacing: 16) {
+                Text("\(weather.formatedDate)")
                     .font(.footnote)
-                Text("Sydney. NSW")
+                Text("\(formatter.cityName)")
                     .font(.system(.subheadline, weight: .bold))
                 
                 Spacer()
                 
                 VStack(alignment: .leading, spacing: 0) {
                     HStack{
-                        Text("28")
+                        Text("\(formatter.temperature)")
                             .font(.system(size: 86, weight: .bold))
                         Text("°C")
                             .font(.system(size: 26))
@@ -32,23 +33,50 @@ struct WeatherView: View {
                         Spacer()
                         
                         VStack{
-                            Text("↑32°C")
+                            Text("↑\(formatter.temperatureMax)°C")
                                 .padding(.bottom)
-                            Text("↓18°C")
+                            Text("↓\(formatter.temperatureMin)°C")
                         }
                     }
                     Capsule()
                         .frame(height: 6)
-                    Text("Clear and sunny")
+                    Text("\(weather.weather[0].main)")
                         .font(.system(size: 24, weight: .light))
                 }
+                .padding(.bottom)
+                ScrollView(.horizontal, showsIndicators: false){
+                    HStack(){
+                        ForEach(forecast.list) { entry in
+                            VStack{
+                                Text("\(entry.main.tempInt)")
+                                    .font(.title2)
+                                
+                                
+                                Image(systemName: weatherIcon(from: entry.weather[0].icon))
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 26, height: 26)
+                                
+                                Text("\(entry.hourPm)".lowercased())
+                                    .font(.title3)
+                                    
+                            }
+                        }
+                    }
+                   
+                }
+                
+                
                
             }
             .padding()
             .background{
-                BackgroundGlowView()
+                BackgroundGlowView(weatherCondition: weather)
             }
-            
+            .preferredColorScheme(.light)
+            .task{
+               await formatter.updateWeather(with: weather)
+            }
         }
         
     }
@@ -58,29 +86,7 @@ struct WeatherView: View {
 
 
 #Preview {
-    WeatherView(weather: pereviewWeather)
+    WeatherView(weather: pereviewWeather, forecast: pereviewForecast)
 }
 
-var pereviewWeather: WeatherModel = load("weatherData.json")
 
-func load<T: Decodable>(_ filename: String) -> T {
-    let data: Data
-
-    guard let file = Bundle.main.url(forResource: filename, withExtension: nil)
-        else {
-            fatalError("Couldn't find \(filename) in main bundle.")
-    }
-
-    do {
-        data = try Data(contentsOf: file)
-    } catch {
-        fatalError("Couldn't load \(filename) from main bundle:\n\(error)")
-    }
-
-    do {
-        let decoder = JSONDecoder()
-        return try decoder.decode(T.self, from: data)
-    } catch {
-        fatalError("Couldn't parse \(filename) as \(T.self):\n\(error)")
-    }
-}

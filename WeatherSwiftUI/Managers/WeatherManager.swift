@@ -12,34 +12,42 @@ final class WeatherManager {
     let baseNetworkManager: NetworkService
     let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String ?? ""
     
+    let baseURL = "https://api.openweathermap.org/data/2.5"
+    
     init(baseNetworkManager: NetworkService = BaseNetworkService()){
         self.baseNetworkManager = baseNetworkManager
     }
     
     
     func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> WeatherModel{
-        guard var components = URLComponents(string: "https://api.openweathermap.org/data/2.5/weather") else {
+        let url = try buildURL(endpoint: "/weather", latitude: latitude, longitude: longitude)
+        return try await baseNetworkManager.fetchData(from: url)
+        
+    }
+    
+    func fetchForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> ForecastModel{
+        let url = try buildURL(endpoint: "/forecast", latitude: latitude, longitude: longitude)
+        return try await baseNetworkManager.fetchData(from: url)
+    }
+    
+    private func buildURL(endpoint: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees) throws -> URL{
+        guard var components = URLComponents(string: baseURL + endpoint) else {
             throw NetworkError.invalidURL
         }
         
         components.queryItems = [
-        URLQueryItem(name: "lat", value: "\(latitude)"),
-        URLQueryItem(name: "lon", value: "\(longitude)"),
-        URLQueryItem(name: "appid", value: apiKey),
-        URLQueryItem(name: "units", value: "metric")
-        
+            URLQueryItem(name: "lat", value: "\(latitude)"),
+            URLQueryItem(name: "lon", value: "\(longitude)"),
+            URLQueryItem(name: "appid", value: apiKey),
+            URLQueryItem(name: "units", value: "metric")
+            
         ]
-         
-        guard let url = components.url else {
+        
+        guard let url = components.url else{
             throw NetworkError.invalidURL
         }
         
-        let (_, response) = try await URLSession.shared.data(from: url)
-        if let httpResponse = response as? HTTPURLResponse {
-            print("HTTP status code:", httpResponse.statusCode)
-        }
-        print(components.url!)
-        
-        return try await baseNetworkManager.fetchData(from: url)
+        return url
     }
+    
 }
